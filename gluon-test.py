@@ -30,20 +30,20 @@ vw = vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)
 vh = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
 filenoext = os.path.splitext(os.path.basename(filename))[0]
-fourcc = cv2.VideoWriter_fourcc('P', 'I', 'M', '1')
+fourcc = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
 print("Video Resolution: %dx%d"%(vw, vh))
 
+shortside = vh if vw > vh else vw
+scale = shortside/shortsize
+
 print("Video out: %s"%filenoext)
-vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, 20, (int(vw), int(vh)))
+vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, 20, (int(vw/scale), int(vh/scale)))
 
 frame_count  = 0
 frame_time_sum = 0
 detect_time_sum = 0
 pose_time_sum = 0
 active_pose_frame_count = 0
-
-shortside = vh if vw > vh else vw
-scale = shortside/shortsize
 
 print("Scale down ratio: %d"%scale)
 
@@ -78,14 +78,15 @@ while vidcap.isOpened():
             active_pose_frame_count += 1
 
             cv_plot_image(img)
-            vidout.write(img)
+            vidout.write(cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
         else:
             cv_plot_image(frame)
-            vidout.write(frame)
+            vidout.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
     else:
         cv2.imshow('Frame', frame)
+        vidout.write(frame)
 
     cv2.waitKey(1)
     frame_count += 1
