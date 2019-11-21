@@ -8,12 +8,13 @@ import time
 import os
 
 filename = '/local/gong/testdata/Event20190916130248003-rotated.avi'
-scale = 2
+shortsize = 320
 detect = True
 frame_rate_skip = 20
 
+#detector = model_zoo.get_model('faster_rcnn_resnet50_v1b_voc', pretrained=True)
+#detector = model_zoo.get_model('faster_rcnn_resnet50_v1b_voc', pretrained=True)
 detector = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
-#detector = model_zoo.get_model('yolo3_mobilenet1.0_coco', pretrained=True)
 #detector = model_zoo.get_model('yolo3_darknet53_voc', pretrained=True)
 pose_net = model_zoo.get_model('simple_pose_resnet18_v1b', pretrained=True)
 
@@ -30,8 +31,8 @@ vh = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
 filenoext = os.path.splitext(filename)[0]
 fourcc = cv2.VideoWriter_fourcc('P', 'I', 'M', '1')
-print(vw)
-print(vh)
+print("Video Resolution: %dx%d"%(vw, vh))
+
 vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, 20, (int(vw), int(vh)))
 
 frame_count  = 0
@@ -39,6 +40,11 @@ frame_time_sum = 0
 detect_time_sum = 0
 pose_time_sum = 0
 active_pose_frame_count = 0
+
+shortside = vh if vw > vh else vw
+scale = shortside/shortsize
+
+print("Scale down ratio: %d"%scale)
 
 while vidcap.isOpened():
     start_frame_time = time.time()
@@ -53,7 +59,6 @@ while vidcap.isOpened():
         frame = mx.nd.array(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)).astype('uint8')
 
         starttime = time.time()
-        shortsize = frame.shape[1] if frame.shape[0] > frame.shape[1] else frame.shape[0]
         x, frame = data.transforms.presets.ssd.transform_test(frame, short = shortsize)
 
         class_IDs, scores, bounding_boxs = detector(x)
