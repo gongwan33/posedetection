@@ -33,11 +33,14 @@ filenoext = os.path.splitext(os.path.basename(filename))[0]
 fourcc = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
 print("Video Resolution: %dx%d"%(vw, vh))
 
+fps = vidcap.get(cv2.CAP_PROP_FPS)
+print("Video is at %d fps"%fps)
+
 shortside = vh if vw > vh else vw
 scale = shortside/shortsize
 
 print("Video out: %s"%filenoext)
-vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, 20, (int(vw/scale), int(vh/scale)))
+vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, int(fps), (int(vw/scale), int(vh/scale)))
 
 frame_count  = 0
 frame_time_sum = 0
