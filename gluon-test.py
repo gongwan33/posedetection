@@ -29,10 +29,11 @@ if vidcap.isOpened() == False:
 vw = vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)
 vh = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
 
-filenoext = os.path.splitext(filename)[0]
+filenoext = os.path.splitext(os.path.basename(filename))[0]
 fourcc = cv2.VideoWriter_fourcc('P', 'I', 'M', '1')
 print("Video Resolution: %dx%d"%(vw, vh))
 
+print("Video out: %s"%filenoext)
 vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, 20, (int(vw), int(vh)))
 
 frame_count  = 0
