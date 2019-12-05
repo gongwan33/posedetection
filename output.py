@@ -59,7 +59,7 @@ class JSONOutput:
                 "image_id": idx,
                 "category_id": 1,
                 "keypoints": points.flatten().tolist(),
-                "score": scores[i].astype("float").round(5).flatten().tolist(),
+                "score": scores[i].astype("float").round(5),
                 "instance_num": len(keypoints),
                 "gpu_percentage": self.gpu_percent,
                 "gpu_memory": self.gpu_memory

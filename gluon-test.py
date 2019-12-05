@@ -9,9 +9,9 @@ import os
 import sys
 from output import JSONOutput
 
-#filename = sys.argv[1]
+filename = sys.argv[1]
 #filename = '/local/gong/testdata/Event20190916130248003-rotated.avi'
-filename = '/local/gong/PD601/short.mp4'
+#filename = '/local/gong/PD601/short.mp4'
 resdir = 'resvideos'
 
 filenameNoPath = os.path.basename(filename)
@@ -19,6 +19,7 @@ filenameNoExt = os.path.splitext(filenameNoPath)[0]
 #filename = '/local/gong/PD601/short.mp4'
 shortsize = 320
 detect = True
+showimage = False
 frame_rate_skip = 20
 
 #detector = model_zoo.get_model('faster_rcnn_resnet50_v1b_voc', pretrained=True)
@@ -95,15 +96,21 @@ while vidcap.isOpened():
             pose_time_sum += (time.time() - starttime)
             active_pose_frame_count += 1
 
-            cv_plot_image(img)
+            if showimage:
+                cv_plot_image(img)
+
             vidout.write(cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
         else:
-            cv_plot_image(frame)
+            if showimage:
+                cv_plot_image(frame)
+
             vidout.write(cv2.cvtColor(frame, cv2.COLOR_RGB2BGR))
 
 
     else:
-        cv2.imshow('Frame', frame)
+        if showimage:
+            cv2.imshow('Frame', frame)
+
         vidout.write(frame)
 
     cv2.waitKey(1)
