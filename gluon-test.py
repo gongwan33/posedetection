@@ -134,7 +134,7 @@ while vidcap.isOpened():
 
 
 print("Total Time: %d"%total_time)
-print("Avg Frame Rate: %f"%round(total_time/(frame_count + 1), 2))
+print("Avg Frame Rate: %f"%round((frame_count + 1)/total_time, 2))
 
 vidcap.release()
 vidout.release()
