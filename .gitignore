@@ -2,3 +2,7 @@
 *.avi
 *.m4v
 *.bak
+resvideos
+resvideos/*
+__pycache__
+__pycache__/*

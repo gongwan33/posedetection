@@ -6,8 +6,17 @@ from gluoncv.utils.viz import cv_plot_image, cv_plot_keypoints
 import mxnet as mx
 import time
 import os
+import sys
+from output import JSONOutput
 
-filename = '/local/gong/testdata/Event20190916130248003-rotated.avi'
+#filename = sys.argv[1]
+#filename = '/local/gong/testdata/Event20190916130248003-rotated.avi'
+filename = '/local/gong/PD601/short.mp4'
+resdir = 'resvideos'
+
+filenameNoPath = os.path.basename(filename)
+filenameNoExt = os.path.splitext(filenameNoPath)[0]
+#filename = '/local/gong/PD601/short.mp4'
 shortsize = 320
 detect = True
 frame_rate_skip = 20
@@ -25,6 +34,7 @@ vidcap = cv2.VideoCapture(filename)
 
 if vidcap.isOpened() == False:
     print("Cannot open file")
+    exit(1)
 
 vw = vidcap.get(cv2.CAP_PROP_FRAME_WIDTH)
 vh = vidcap.get(cv2.CAP_PROP_FRAME_HEIGHT)
@@ -40,15 +50,18 @@ shortside = vh if vw > vh else vw
 scale = shortside/shortsize
 
 print("Video out: %s"%filenoext)
-vidout = cv2.VideoWriter(filenoext + '-res.mp4', fourcc, int(fps), (int(vw/scale), int(vh/scale)))
+vidout = cv2.VideoWriter(resdir + '/' + filenoext + '-res.mp4', fourcc, int(fps), (int(vw/scale), int(vh/scale)))
 
 frame_count  = 0
 frame_time_sum = 0
 detect_time_sum = 0
 pose_time_sum = 0
 active_pose_frame_count = 0
+total_time = 0
 
 print("Scale down ratio: %d"%scale)
+
+jsonOutput = JSONOutput(resdir + '/' + filenameNoExt + '.json')
 
 while vidcap.isOpened():
     start_frame_time = time.time()
@@ -75,6 +88,8 @@ while vidcap.isOpened():
             predicted_heatmap = pose_net(pose_input)
             pred_coords, confidence = heatmap_to_coord(predicted_heatmap, upscale_bbox)
 
+            jsonOutput.write(confidence, pred_coords, scores, frame_count + 1)
+
             img = cv_plot_keypoints(frame, pred_coords, confidence, class_IDs, bounding_boxs, scores,
                                             box_thresh=0.5, keypoint_thresh=0.2)
             pose_time_sum += (time.time() - starttime)
@@ -95,6 +110,7 @@ while vidcap.isOpened():
     frame_count += 1
     frame_time = time.time() - start_frame_time
     frame_time_sum += frame_time
+    total_time += frame_time
 
     if frame_count%frame_rate_skip == 0:
         print("Frame %d"%frame_count)
@@ -110,6 +126,10 @@ while vidcap.isOpened():
         active_pose_frame_count = 0
 
 
+print("Total Time: %d"%total_time)
+print("Avg Frame Rate: %f"%round(total_time/(frame_count + 1), 2))
+
 vidcap.release()
 vidout.release()
 cv2.destroyAllWindows()
+jsonOutput.release()
