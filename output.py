@@ -41,7 +41,7 @@ class JSONOutput:
             self.thread_lock.acquire()
             self.gpu_percent, self.gpu_memory = GPUInfo.gpu_usage()
             self.thread_lock.release()
-            time.sleep(1)
+            time.sleep(2)
 
         print("GPUINFO: End loop")
         return
@@ -54,13 +54,17 @@ class JSONOutput:
 
         for i, points in enumerate(keypoints):
             points = points.asnumpy()
+            points_ary = points.flatten().tolist()
+            scores_ary = scores[i].astype("float").round(5)
+            instance_num = len(keypoints)
+
             self.thread_lock.acquire()
             key_annotation = {
                 "image_id": idx,
                 "category_id": 1,
-                "keypoints": points.flatten().tolist(),
-                "score": scores[i].astype("float").round(5),
-                "instance_num": len(keypoints),
+                "keypoints": points_ary,
+                "score": scores_ary,
+                "instance_num": instance_num,
                 "gpu_percentage": self.gpu_percent,
                 "gpu_memory": self.gpu_memory
             }
